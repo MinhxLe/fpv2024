@@ -29,18 +29,18 @@ def K : α → β → α :=
   fun a b ↦ a
 
 def C : (α → β → γ) → β → α → γ :=
-  sorry
+  fun a b c ↦ a c b
 
 def projFst : α → α → α :=
-  sorry
+  fun a b ↦ a
 
 /- Give a different answer than for `projFst`. -/
 
 def projSnd : α → α → α :=
-  sorry
+  fun a b ↦ b
 
 def someNonsense : (α → β → γ) → α → (α → γ) → β → γ :=
-  sorry
+  fun a b c d  ↦  a b d
 
 
 /- ## Question 2: Typing Derivation
@@ -50,6 +50,8 @@ ASCII or Unicode art. You might find the characters `–` (to draw horizontal
 bars) and `⊢` useful. -/
 
 -- write your solution in a comment here or on paper
+
+
 
 /- ## Question 3: Arithmetic Expressions
 
@@ -82,6 +84,12 @@ def someEnv : String → ℤ
 
 #eval eval someEnv (AExp.var "x")   -- expected: 3
 -- invoke `#eval` here
+#eval eval someEnv (AExp.add (AExp.var "x") (AExp.num 1))
+#eval eval someEnv (AExp.sub (AExp.var "x") (AExp.var "y"))
+#eval eval someEnv (AExp.mul (AExp.var "x") (AExp.var "y"))
+#eval eval someEnv (AExp.mul (AExp.var "x") (AExp.var "y"))
+-- why does this evaluate to 0
+#eval eval someEnv (AExp.div (AExp.var "x") (AExp.num 0))
 
 /-
 ### 3.2.
@@ -94,6 +102,13 @@ operators. -/
 def simplify : AExp → AExp
   | AExp.add (AExp.num 0) e₂ => simplify e₂
   | AExp.add e₁ (AExp.num 0) => simplify e₁
+
+  | AExp.sub e₁ (AExp.num 0) => simplify e₁
+
+  | AExp.mul e₁ (AExp.num 1) => simplify e₁
+  | AExp.mul (AExp.num 1) e₂ => simplify e₂
+
+  | AExp.div e₁ (AExp.num 1) => simplify e₁
   -- insert the missing cases here
   -- catch-all cases below
   | AExp.num i               => AExp.num i
@@ -116,7 +131,7 @@ the property that the value of `e` after simplification is the same as the
 value of `e` before. -/
 
 theorem simplify_correct (env : String → ℤ) (e : AExp) :
-  True :=   -- replace `True` with your theorem statement
+  eval env e = eval env (simplify e) :=   -- replace `True` with your theorem statement
   sorry     -- leave `sorry` alone
 
 /-! ## Question 4: Lists and Options
@@ -138,7 +153,6 @@ Here are some examples of options: -/
 #check some "hello"
 #check some 14
 #check some (λ x => 2 * x)
-
 /-!
 ### 4.1.
 
@@ -152,7 +166,9 @@ the output. Here's an example:
 `omap (λ x => x + 1) [some 0, none, some 2] = [some 1, none, some 3]` -/
 
 def omap {α β : Type} (f : α → β) : List (Option α) → List (Option β)
-  := sorry
+  | List.nil => List.nil
+  | List.cons Option.none xs => List.cons Option.none (omap f xs)
+  | List.cons (Option.some x) xs => List.cons (Option.some (f x)) ((omap) f xs)
 
 /-!
 
@@ -170,3 +186,9 @@ Try to give meaningful names to your theorems, and make sure to state them
 as generally as possible. You can enter `sorry` in lieu of a proof. -/
 
   -- Write your theorem statements here
+
+theorem omap_identity_is_identity (l: List (Option α)): 
+  l = omap I l := sorry
+
+theorem omap_is_distributive (l: List (Option α))(f: α -> β )(g: β -> γ): 
+  omap g (omap f l)  = omap (λ x ↦ g (f x)) l:= sorry
