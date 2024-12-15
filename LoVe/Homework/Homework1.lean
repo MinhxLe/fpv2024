@@ -149,14 +149,17 @@ implement this function. Make the type `α` an implicit argument.
 Hint: you might find `List.append` useful in your implementation! You can also
 use the notation `xs ++ ys` for `List.append xs ys`. -/
 
+
 -- write your solution here
+def reverse {α : Type}: List α -> List α
+  | [] => []
+  | x :: xs => reverse xs ++ [x]
 
 -- Once you've written your solution, uncomment these test cases and check that
 -- they give the expected outputs
--- #eval reverse [1, 2, 3, 4, 5] -- expected: [5, 4, 3, 2, 1]
--- #eval reverse ([] : List ℕ)  -- expected: []
--- #eval @reverse ℕ []          -- expected: []
-
+#eval reverse [1, 2, 3, 4, 5] -- expected: [5, 4, 3, 2, 1]
+#eval reverse ([] : List ℕ)  -- expected: []
+#eval @reverse ℕ []          -- expected: []
 
 
 
@@ -198,14 +201,15 @@ def f (x : ℕ) (y : ℕ := 1) (w : ℕ := 2) (z : ℕ) :=
 
 Change the value of `z` below so that the expression evaluates to `2`. -/
 
-#eval f (z := 3) 1
+#eval f (z := 2) 1
+
 
 /- ### 3.3 (1 point)
 
 Specify a value for `w` below so that the expression evaluates to `5`. -/
 
-#eval f (y := 3) (x := 1) (z := 1)
-
+#eval f (y := 3) (x := 1) (z := 1) (w:= 2)
+-- 3 + 1 + w - 1
 /-
 ## Question 4 (5 points): Combining Lists
 
@@ -215,15 +219,14 @@ We define the *melding* (a coined term) of two lists to be the list formed
 by applying a combining function to each corresponding pair of elements in the
 two lists. For instance, the melding of `[1, 2, 3]` and `[4, 5, 6]` using the
 combining function `(+)` would be the list `[5, 7, 9]`. If one list is longer
-than the other, the excess elements in the longer list are ignored. Thus, the
 melding of `["a"]` and `["b", "c"]` using `(++)` is `["ab"]`.
 
 Implement a function `meld` that performs this operation.
 -/
-
-@[autogradedDef 2, validTactics #[rfl, simp [meld]]]
 def meld {α β γ : Type} : (α → β → γ) → List α → List β → List γ
-  := sorry
+  | f, [], _ => []
+  | f,_, []  => []
+  | f, x :: xs, y :: ys => (f x y) :: (meld f xs ys)
 
 /-!
 ### 4.2 (1 point)
@@ -246,7 +249,7 @@ below is to replace `sorry` with a *non-recursive* function.
 -/
 @[autogradedDef 1, validTactics #[rfl]]
 def zip {α β : Type} : List α → List β → List (α × β) :=
-meld sorry
+meld Prod.mk 
 
 /-
 ### 4.3 (1 point)
@@ -259,7 +262,12 @@ Hint: `min : ℕ → ℕ → ℕ` returns the minimum of two numbers.
 -/
 
 -- Replace `True` with your lemma statement. No need to fill in the `sorry`!
-theorem length_meld : True := sorry
+def length {α : Type}: (l: List α ) -> ℤ 
+  | [] => 0
+  | x :: xs => 1 + length xs
+
+theorem length_meld {α β γ
+: Type}(f: α -> β -> γ )(l1: List α )(l2: List β): min (length l1) (length l2) = length (meld f l1 l2) := sorry
 
 /-
 ### 4.4 (1 point)
