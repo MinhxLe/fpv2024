@@ -49,16 +49,16 @@ constructing a term. By hovering over `_`, you will see the current logical
 context. -/
 
 @[autogradedProof 1] def B : (α → β) → (γ → α) → γ → β :=
-  sorry
+  fun f g c ↦ f (g c)
 
 @[autogradedProof 1] def S : (α → β → γ) → (α → β) → α → γ :=
-  sorry
+  fun f g a ↦ f a (g a)
 
 @[autogradedProof 1] def moreNonsense : (γ → (α → β) → α) → γ → β → α :=
-  sorry
+  fun f c b  ↦ f c (λ a ↦ b) 
 
 @[autogradedProof 1] def evenMoreNonsense : (α → α → β) → (β → γ) → α → β → γ :=
-  sorry
+  fun f g a b ↦ g (f a a)
 
 /- ### 1.2 (2 points)
 
@@ -68,10 +68,8 @@ This one looks more difficult, but it should be fairly straightforward if you
 follow the procedure described in the Hitchhiker's Guide.
 
 Note: Peirce is pronounced like the English word "purse." -/
-
 @[autogradedProof 2] def weakPeirce : ((((α → β) → α) → α) → β) → β :=
-  sorry
-
+  fun f: ((((α → β) → α) → α) → β) ↦ f (fun g: (α -> β) -> α ↦ g (fun x: α ↦ f (fun h ↦ x)))
 
 /- ## Question 2 (4 points): Typing Derivation
 
@@ -82,6 +80,22 @@ useful.
 Feel free to introduce abbreviations to avoid repeating large contexts `C`. -/
 
 -- Write your solution here
+/- 
+Let C:= a: α , b: β , c: γ f: α -> β -> γ, g: α -> β 
+
+-------- Var
+C ⊢ f: α -> β -> γ, a: α 
+------- App      ---Var
+⊢ f a: β -> γ    C ⊢ b: β  
+----------- App
+a: α ⊢ f a b: γ                    
+--------- Fun                       
+g: α -> β (var?)  ⊢ (fun a: α ↦ f a b): α -> γ  
+--------- Fun       
+f: α -> β -> γ ⊢ (fun (g: α -> β) (a: α) ↦ f a b): (α -> β) -> α -> γ 
+--------- Fun       
+ ⊢ (fun (f: α -> β -> γ )(g: α -> β) (a: α) ↦ f a b): (α -> β -> γ ) -> (α -> β) -> α -> γ 
+-/
 
 
 
@@ -149,14 +163,17 @@ implement this function. Make the type `α` an implicit argument.
 Hint: you might find `List.append` useful in your implementation! You can also
 use the notation `xs ++ ys` for `List.append xs ys`. -/
 
+
 -- write your solution here
+def reverse {α : Type}: List α -> List α
+  | [] => []
+  | x :: xs => reverse xs ++ [x]
 
 -- Once you've written your solution, uncomment these test cases and check that
 -- they give the expected outputs
--- #eval reverse [1, 2, 3, 4, 5] -- expected: [5, 4, 3, 2, 1]
--- #eval reverse ([] : List ℕ)  -- expected: []
--- #eval @reverse ℕ []          -- expected: []
-
+#eval reverse [1, 2, 3, 4, 5] -- expected: [5, 4, 3, 2, 1]
+#eval reverse ([] : List ℕ)  -- expected: []
+#eval @reverse ℕ []          -- expected: []
 
 
 
@@ -198,14 +215,15 @@ def f (x : ℕ) (y : ℕ := 1) (w : ℕ := 2) (z : ℕ) :=
 
 Change the value of `z` below so that the expression evaluates to `2`. -/
 
-#eval f (z := 3) 1
+#eval f (z := 2) 1
+
 
 /- ### 3.3 (1 point)
 
 Specify a value for `w` below so that the expression evaluates to `5`. -/
 
-#eval f (y := 3) (x := 1) (z := 1)
-
+#eval f (y := 3) (x := 1) (z := 1) (w:= 2)
+-- 3 + 1 + w - 1
 /-
 ## Question 4 (5 points): Combining Lists
 
@@ -215,15 +233,14 @@ We define the *melding* (a coined term) of two lists to be the list formed
 by applying a combining function to each corresponding pair of elements in the
 two lists. For instance, the melding of `[1, 2, 3]` and `[4, 5, 6]` using the
 combining function `(+)` would be the list `[5, 7, 9]`. If one list is longer
-than the other, the excess elements in the longer list are ignored. Thus, the
 melding of `["a"]` and `["b", "c"]` using `(++)` is `["ab"]`.
 
 Implement a function `meld` that performs this operation.
 -/
-
-@[autogradedDef 2, validTactics #[rfl, simp [meld]]]
 def meld {α β γ : Type} : (α → β → γ) → List α → List β → List γ
-  := sorry
+  | f, [], _ => []
+  | f,_, []  => []
+  | f, x :: xs, y :: ys => (f x y) :: (meld f xs ys)
 
 /-!
 ### 4.2 (1 point)
@@ -246,7 +263,7 @@ below is to replace `sorry` with a *non-recursive* function.
 -/
 @[autogradedDef 1, validTactics #[rfl]]
 def zip {α β : Type} : List α → List β → List (α × β) :=
-meld sorry
+meld Prod.mk 
 
 /-
 ### 4.3 (1 point)
@@ -259,7 +276,12 @@ Hint: `min : ℕ → ℕ → ℕ` returns the minimum of two numbers.
 -/
 
 -- Replace `True` with your lemma statement. No need to fill in the `sorry`!
-theorem length_meld : True := sorry
+def length {α : Type}: (l: List α ) -> ℤ 
+  | [] => 0
+  | x :: xs => 1 + length xs
+
+theorem length_meld {α β γ
+: Type}(f: α -> β -> γ )(l1: List α )(l2: List β): min (length l1) (length l2) = length (meld f l1 l2) := sorry
 
 /-
 ### 4.4 (1 point)
@@ -287,6 +309,15 @@ sorry
 
 /-
 Your answer here:
+Two lists are the same if they have the same length and each element is the same. 
+1. the length of both list is dicated by the zip application which means the length is min(length xs, length ys). so the lengths are the same
+2. on RHS, let x_i be the ith element of  xs and y_i be the ith element of ys. 
+- the ith element of zip xs ys is then (x_i, y_i)
+- the ithe leemtn of (zip xs ys).map Prod.swap is then (y_i, x_i)
+- This is exactly the ith elemnt of zip ys xs. 
+- therefore the 2 lists are equivalent.
+
+
 
 
 
