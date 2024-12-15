@@ -29,7 +29,7 @@ def K : α → β → α :=
   fun a b ↦ a
 
 def C : (α → β → γ) → β → α → γ :=
-  fun a b c ↦ a c b
+  fun f b a ↦ f a b
 
 def projFst : α → α → α :=
   fun a b ↦ a
@@ -50,7 +50,24 @@ ASCII or Unicode art. You might find the characters `–` (to draw horizontal
 bars) and `⊢` useful. -/
 
 -- write your solution in a comment here or on paper
+/- 
+I want to show fun f b c ↦ f b c
 
+Let C := f: α -> β -> γ , b: β, a: α
+
+------- Var
+C ⊢ f: α -> β -> γ , a: α 
+-------------- App    ------- Var
+C ⊢ f a: β -> γ        C ⊢ b: β 
+---------------- App
+f a: (β -> γ), b: Β ⊢ f a b: γ 
+-------- Fun
+f: α -> β -> γ, b: β  ⊢ (fun a: α ↦ f a b): α -> γ 
+-------- Fun (a new unbounded b)
+f: α -> β -> γ  ⊢ (fun (b: β)(a: α) ↦ f a b): β -> α -> γ 
+-------- Fun 
+⊢ (fun (f: α -> β -> γ)(b: β)(a: α) ↦ f a b): (α -> β -> γ  -> β -> α -> γ 
+-/
 
 
 /- ## Question 3: Arithmetic Expressions

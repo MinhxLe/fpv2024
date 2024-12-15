@@ -80,6 +80,22 @@ useful.
 Feel free to introduce abbreviations to avoid repeating large contexts `C`. -/
 
 -- Write your solution here
+/- 
+Let C:= a: α , b: β , c: γ f: α -> β -> γ, g: α -> β 
+
+-------- Var
+C ⊢ f: α -> β -> γ, a: α 
+------- App      ---Var
+⊢ f a: β -> γ    C ⊢ b: β  
+----------- App
+a: α ⊢ f a b: γ                    
+--------- Fun                       
+g: α -> β (var?)  ⊢ (fun a: α ↦ f a b): α -> γ  
+--------- Fun       
+f: α -> β -> γ ⊢ (fun (g: α -> β) (a: α) ↦ f a b): (α -> β) -> α -> γ 
+--------- Fun       
+ ⊢ (fun (f: α -> β -> γ )(g: α -> β) (a: α) ↦ f a b): (α -> β -> γ ) -> (α -> β) -> α -> γ 
+-/
 
 
 
@@ -285,6 +301,15 @@ sorry
 
 /-
 Your answer here:
+Two lists are the same if they have the same length and each element is the same. 
+1. the length of both list is dicated by the zip application which means the length is min(length xs, length ys). so the lengths are the same
+2. on RHS, let x_i be the ith element of  xs and y_i be the ith element of ys. 
+- the ith element of zip xs ys is then (x_i, y_i)
+- the ithe leemtn of (zip xs ys).map Prod.swap is then (y_i, x_i)
+- This is exactly the ith elemnt of zip ys xs. 
+- therefore the 2 lists are equivalent.
+
+
 
 
 
