@@ -32,7 +32,7 @@ theorem fst_of_two_props :
     ∀a b : Prop, a → b → a := by
   intro a b
   intro ha hb
-  apply ha
+  apply ha  -- why does this work but not just ha
   done
 
 
@@ -49,7 +49,12 @@ types, which will be explained in chapter 4.
 ## Basic Tactics
 
 `intro` moves `∀`-quantified variables, or the assumptions of implications `→`,
-from the goal's conclusion (after `⊢`) into the goal's hypotheses (before `⊢`).
+from the goal's conclusion (after `⊢`) into the goal's hypotheses (before `⊢`). 
+
+[NOTE] 
+- conclusion is what is implied given hypothesis
+- hypothesis is what needs to be proven(?)
+- [QUESTION] what does "assumptions of implication" mean?
 
 `apply` matches the goal's conclusion with the conclusion of the specified
 theorem and adds the theorem's hypotheses as new goals.
@@ -71,6 +76,14 @@ theorem prop_comp (a b c : Prop) (hab : a → b) (hbc : b → c) :
     a → c := by
   intro ha
   apply hbc
+  apply hab
+  apply ha
+  done
+
+theorem prop_comp_2 (a b c: Prop)(hab: a -> b)(hbc: b -> c):
+  a -> c := by
+  intro ha -- with ha, we now need to prove c
+  apply hbc -- hbc, we match the conclusion (c) to goal c and now need to prove b
   apply hab
   apply ha
   done
@@ -98,6 +111,9 @@ theorem fst_of_two_props_assumption (a b : Prop)
     a :=
   by assumption
 
+
+theorem by_assumption(a: Prop)(ha: a): 
+  a := by assumption
 
 /- ## Reasoning about Logical Connectives and Quantifiers
 
@@ -130,6 +146,23 @@ Introduction rules: -/
 `p → False`. -/
 
 
+
+theorem And_swap_diy (a b : Prop) :
+    a ∧ b → b ∧ a := by
+    intro hab  -- assume a^b
+    apply And.intro  --creates 2 subgoal
+    -- first one is a^b ⊢ b
+    apply And.right
+    -- new goal is a^b
+    apply hab
+
+    apply And.left
+    apply hab
+    done
+
+
+
+
 theorem And_swap (a b : Prop) :
     a ∧ b → b ∧ a := by
   intro hab
@@ -159,7 +192,7 @@ theorem And_swap_braces :
     ∀a b : Prop, a ∧ b → b ∧ a := by
   intro a b hab
   apply And.intro
-  { exact And.right hab }
+  { exact And.right hab } -- notice the composition of tactics
   { exact And.left hab }
   done
 
@@ -177,6 +210,20 @@ theorem f5_if (h : ∀n : ℕ, f n = n) :
   by exact h 5
 
 
+
+
+theorem Or_swap_diy (a b : Prop) :
+  a ∨ b -> b ∨ a := by
+  intro hab 
+  apply Or.elim hab   -- proof by cases on an or statement. shows LHS -> c and RHS -> c
+  {
+    intro ha
+    exact Or.inr ha } 
+  {
+    intro hb
+    exact Or.inl hb }
+  done
+
 theorem Or_swap (a b : Prop) :
     a ∨ b → b ∨ a := by
   intro hab
@@ -187,12 +234,30 @@ theorem Or_swap (a b : Prop) :
     exact Or.inl hb }
   done
 
+
+theorem modus_ponens_diy (a b : Prop) :
+    (a → b) → a → b := by
+    intro hab ha 
+    exact hab ha
+
+
+
+
 theorem modus_ponens (a b : Prop) :
     (a → b) → a → b := by
   intro hab ha
   apply hab
   exact ha
   done
+
+theorem Not_Not_intro_diy (a : Prop) :
+    a → ¬¬ a := by
+    intro ha hna -- a and (not a which is a -> False), goal is False
+    apply hna -- now goal is a
+    exact ha
+    done
+
+
 
 theorem Not_Not_intro (a : Prop) :
     a → ¬¬ a := by

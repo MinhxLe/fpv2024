@@ -97,6 +97,13 @@ opaque g : ℤ → ℤ → ℤ
 
 #check fun x ↦ x
 
+opaque asdf: ℕ -> ℕ
+#check fun x: ℕ  => x*2
+
+def to_list {α : Type} (x: α) := [x]
+#check to_list 1
+#check to_list "hi"
+
 
 /- ## Type Checking and Type Inference
 
