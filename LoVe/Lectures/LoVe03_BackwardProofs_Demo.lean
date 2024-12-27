@@ -29,11 +29,11 @@ The keyword `by` indicates to Lean the proof is tactical. -/
 
 
 theorem fst_of_two_props :
-    ∀a b : Prop, a → b → a := by
-  intro a b
-  intro ha hb
-  apply ha  -- why does this work but not just ha
-  done
+    ∀a b : Prop, a → (b → a) := by
+    intro a b
+    intro ha hb
+    apply ha
+    done
 
 
 /- Note that `a → b → a` is parsed as `a → (b → a)`.
@@ -64,7 +64,7 @@ lambda and application expressions?
 
 -/
 
-
+-- by passing in the parameters to theorem, we do not need intro
 theorem fst_of_two_props_params (a b : Prop) (ha : a) (hb : b) :
     a := by
   apply ha
@@ -82,10 +82,12 @@ theorem prop_comp (a b c : Prop) (hab : a → b) (hbc : b → c) :
 
 theorem prop_comp_2 (a b c: Prop)(hab: a -> b)(hbc: b -> c):
   a -> c := by
-  intro ha -- with ha, we now need to prove c
-  apply hbc -- hbc, we match the conclusion (c) to goal c and now need to prove b
+  intro ha
+  apply hbc
   apply hab
   apply ha
+
+
   done
 
 /- The above proof step by step:
@@ -149,16 +151,10 @@ Introduction rules: -/
 
 theorem And_swap_diy (a b : Prop) :
     a ∧ b → b ∧ a := by
-    intro hab  -- assume a^b
-    apply And.intro  --creates 2 subgoal
-    -- first one is a^b ⊢ b
-    apply And.right
-    -- new goal is a^b
-    apply hab
-
-    apply And.left
-    apply hab
-    done
+    intro hab
+    apply And.intro
+    {exact And.right hab}
+    {exact And.left hab}
 
 
 
@@ -363,6 +359,22 @@ Which ones of these are *reduction rules*?
 /- The above rules can be used directly: -/
 
 
+
+
+theorem Eq_trans_symm_redo {α : Type} (a b c : α)
+  (hab : a = b) (hcb : c = b) :
+    a = c := by
+  apply Eq.trans
+  { exact hab }
+  { apply Eq.symm
+    exact hcb }
+  
+  
+
+
+
+
+
 theorem Eq_trans_symm {α : Type} (a b c : α)
   (hab : a = b) (hcb : c = b) :
     a = c := by
@@ -424,11 +436,33 @@ theorem abc_Eq_cba (a b c : ℕ) :
 named subgoal per constructor. -/
 
 
+theorem add_zero_diy (n : ℕ) :
+  add 0 n = n := 
+  by 
+    induction n with
+      | zero => rfl
+      | succ n ih => simp [add, ih]  -- add is add (m succ n) = succ (add m n)
+    
+        
+
+
+
+
 theorem add_zero (n : ℕ) :
   add 0 n = n :=
   by
     induction n with
     | zero       => rfl
+    | succ n' ih => simp [add, ih]
+
+
+
+
+theorem add_succ_diy (m n : ℕ) :
+  add (Nat.succ m) n = Nat.succ (add m n) :=
+  by 
+    induction n with
+    | zero => rfl
     | succ n' ih => simp [add, ih]
 
 
